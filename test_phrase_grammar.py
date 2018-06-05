@@ -49,7 +49,7 @@ def mean(x):
     return sum(x) / len(x)
 
 
-def test(model, corpus, cuda, prt=False):
+def test(model, corpus, cuda, prt=False, length = 10):
     model.eval()
 
     prec_list = []
@@ -58,7 +58,7 @@ def test(model, corpus, cuda, prt=False):
 
     nsens = 0
     for sen, sen_tree in zip(corpus.train_sens, corpus.train_trees):
-        if len(sen) > 12:
+        if len(sen) > length + 2:
             continue
         x = numpy.array([corpus.dictionary[w] for w in sen])
         input = Variable(torch.LongTensor(x[:, None]))

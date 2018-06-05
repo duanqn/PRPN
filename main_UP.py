@@ -68,6 +68,7 @@ parser.add_argument('--device', type=int, default=0,
                     help='select GPU')
 parser.add_argument('--length', type=int, default=-1, help='Maximum sentence length')
 parser.add_argument('--dictname', type=str, default='dict.pkl', help='Dictionary file name')
+parser.add_argument('--testlen', type=int, default=10, help='Maximum number of words in test sentences')
 args = parser.parse_args()
 
 torch.cuda.set_device(args.device)
@@ -230,7 +231,7 @@ try:
     for epoch in range(1, args.epochs + 1):
         epoch_start_time = time.time()
         train_loss = train()
-        test_f1 = test(model, corpus, args.cuda)
+        test_f1 = test(model, corpus, args.cuda, args.testlen)
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | train loss {:5.2f} | test f1 {:5.2f}'.format(
             epoch, (time.time() - epoch_start_time), train_loss, test_f1))
