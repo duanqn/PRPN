@@ -66,6 +66,8 @@ parser.add_argument('--model', type=str, default='new_gate',
                     help='type of model to use')
 parser.add_argument('--device', type=int, default=0,
                     help='select GPU')
+parser.add_argument('--length', type=int, default=-1, help='Maximum sentence length')
+parser.add_argument('--dictname', type=str, default='dict.pkl', help='Dictionary file name')
 args = parser.parse_args()
 
 torch.cuda.set_device(args.device)
@@ -82,8 +84,7 @@ if torch.cuda.is_available():
 # Load data
 ###############################################################################
 
-corpus = data.Corpus(args.data)
-
+corpus = data.Corpus(args.data, args.length, args.dictname)
 
 def batchify(data, bsz):
     # Work out how cleanly we can divide the dataset into bsz parts.
@@ -138,7 +139,7 @@ if args.cuda:
 def criterion(input, targets, targets_mask):
     targets_mask = targets_mask.view(-1)
     input = input.view(-1, ntokens)
-    input = F.log_softmax(input, dim=-1)
+    input = F.log_softmax(input)
     loss = torch.gather(input, 1, targets[:, None]).view(-1)
     loss = (-loss * targets_mask).sum() / targets_mask.sum()
     return loss

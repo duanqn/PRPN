@@ -71,9 +71,10 @@ class Dictionary(object):
 
 
 class Corpus(object):
-    def __init__(self, path):
-        dict_file_name = os.path.join(path, 'dict.pkl')
+    def __init__(self, path, maxlen, dictname):
+        dict_file_name = os.path.join(path, dictname)
         if os.path.exists(dict_file_name):
+            print 'Using the dict ' + dict_file_name + ' !'
             self.dictionary = cPickle.load(open(dict_file_name, 'rb'))
         else:
             self.dictionary = Dictionary()
@@ -83,10 +84,12 @@ class Corpus(object):
             self.dictionary.rebuild_by_freq()
             cPickle.dump(self.dictionary, open(dict_file_name, 'wb'))
 
-        self.train, self.train_sens, self.train_trees = self.tokenize(train_file_ids)
-        self.valid, self.valid_sens, self.valid_trees = self.tokenize(valid_file_ids)
-        self.test, self.test_sens, self.test_trees = self.tokenize(test_file_ids)
-        self.rest, self.rest_sens, self.rest_trees = self.tokenize(rest_file_ids)
+
+        self.train, self.train_sens, self.train_trees = self.tokenize(train_file_ids, maxlen)
+        print str(len(self.train_sens)) + " sentences"
+        self.valid, self.valid_sens, self.valid_trees = self.tokenize(valid_file_ids, maxlen)
+        self.test, self.test_sens, self.test_trees = self.tokenize(test_file_ids, maxlen)
+        self.rest, self.rest_sens, self.rest_trees = self.tokenize(rest_file_ids, maxlen)
 
     def filter_words(self, tree):
         words = []
@@ -100,8 +103,10 @@ class Corpus(object):
         return words
 
     def add_words(self, file_ids):
+        print 'add_words'
         # Add words to the dictionary
         for id in file_ids:
+            # print "Processing " + id
             sentences = ptb.parsed_sents(id)
             for sen_tree in sentences:
                 words = self.filter_words(sen_tree)
@@ -109,7 +114,7 @@ class Corpus(object):
                 for word in words:
                     self.dictionary.add_word(word)
 
-    def tokenize(self, file_ids):
+    def tokenize(self, file_ids, maxlen):
 
         def tree2list(tree):
             if isinstance(tree, nltk.Tree):
@@ -135,8 +140,9 @@ class Corpus(object):
             for sen_tree in sentences:
                 words = self.filter_words(sen_tree)
                 words = ['<s>'] + words + ['</s>']
-                # if len(words) > 50:
-                #     continue
+                if maxlen != -1:
+                    if len(words) > maxlen + 2:	# <s> and </s>
+                        continue
                 sens.append(words)
                 idx = []
                 for word in words:
