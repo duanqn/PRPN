@@ -130,6 +130,8 @@ if __name__ == '__main__':
                         help='random seed')
     parser.add_argument('--cuda', action='store_true',
                         help='use CUDA')
+    parser.add_argument('--device', type=int, default=0,
+                    help='select GPU')
     parser.add_argument('--length', type=int, default=-1, help='Maximum sentence length')
     parser.add_argument('--dictname', type=str, default='dict.pkl', help='Dictionary file name')
     parser.add_argument('--testlen', type=int, default=10, help='Maximum number of words in test sentences')
@@ -143,6 +145,7 @@ if __name__ == '__main__':
         model = torch.load(f)
         if args.cuda:
             model.cuda()
+            torch.cuda.set_device(args.device)
             torch.cuda.manual_seed(args.seed)
         else:
             model.cpu()
