@@ -231,7 +231,7 @@ try:
     for epoch in range(1, args.epochs + 1):
         epoch_start_time = time.time()
         train_loss = train()
-        test_f1 = test(model, corpus, args.cuda, args.testlen)
+        test_f1 = test(model, corpus, args.cuda, length=args.testlen)
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | train loss {:5.2f} | test f1 {:5.2f}'.format(
             epoch, (time.time() - epoch_start_time), train_loss, test_f1))
@@ -252,7 +252,7 @@ with open(args.save, 'rb') as f:
     model = torch.load(f)
 
 # Run on test data.
-test_f1 = test(model, corpus, args.cuda, args.testlen)
+test_f1 = test(model, corpus, args.cuda, length=args.testlen)
 print('=' * 89)
 print('| End of training | test f1 {:5.2f}'.format(
     test_f1))
