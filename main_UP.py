@@ -138,7 +138,7 @@ if args.cuda:
 def criterion(input, targets, targets_mask):
     targets_mask = targets_mask.view(-1)
     input = input.view(-1, ntokens)
-    input = F.log_softmax(input, dim=-1)
+    input = F.log_softmax(input)
     loss = torch.gather(input, 1, targets[:, None]).view(-1)
     loss = (-loss * targets_mask).sum() / targets_mask.sum()
     return loss
