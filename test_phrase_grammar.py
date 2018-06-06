@@ -136,6 +136,7 @@ if __name__ == '__main__':
     parser.add_argument('--dictname', type=str, default='dict.pkl', help='Dictionary file name')
     parser.add_argument('--testlen', type=int, default=10, help='Maximum number of words in test sentences')
     args = parser.parse_args()
+    torch.cuda.set_device(args.device)
 
     # Set the random seed manually for reproducibility.
     torch.manual_seed(args.seed)
@@ -145,7 +146,6 @@ if __name__ == '__main__':
         model = torch.load(f)
         if args.cuda:
             model.cuda()
-            torch.cuda.set_device(args.device)
             torch.cuda.manual_seed(args.seed)
         else:
             model.cpu()
