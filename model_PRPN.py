@@ -85,13 +85,10 @@ class PRPN(nn.Module):
                 reader_state[j] = new_memory
 
             # predict layer
-            selected_memory_h, predictor_state, attention1 = self.predictor.attention(h_i, predictor_state,
-                                                                                      gate_time=memory_gate_next[i])
             output_h.append(h_i)
-            output_memory.append(selected_memory_h)
+            output_memory.append(h_i)
 
             attention.append(memory_gate_next[i])
-            attention.append(attention1)
             attentions.append(torch.stack(attention, dim=1))
 
         self.attentions = torch.stack(attentions, dim=0)
