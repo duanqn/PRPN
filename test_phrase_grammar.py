@@ -52,6 +52,8 @@ def mean(x):
 def test(model, corpus, cuda, prt=False, length = 10):
     model.eval()
 
+    print "Testing with len <= " + str(length)
+
     prec_list = []
     reca_list = []
     f1_list = []

@@ -252,7 +252,7 @@ with open(args.save, 'rb') as f:
     model = torch.load(f)
 
 # Run on test data.
-test_f1 = test(model, corpus, args.cuda)
+test_f1 = test(model, corpus, args.cuda, args.testlen)
 print('=' * 89)
 print('| End of training | test f1 {:5.2f}'.format(
     test_f1))
