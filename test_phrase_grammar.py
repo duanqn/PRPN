@@ -130,6 +130,9 @@ if __name__ == '__main__':
                         help='random seed')
     parser.add_argument('--cuda', action='store_true',
                         help='use CUDA')
+    parser.add_argument('--length', type=int, default=-1, help='Maximum sentence length')
+    parser.add_argument('--dictname', type=str, default='dict.pkl', help='Dictionary file name')
+    parser.add_argument('--testlen', type=int, default=10, help='Maximum number of words in test sentences')
     args = parser.parse_args()
 
     # Set the random seed manually for reproducibility.
@@ -145,6 +148,6 @@ if __name__ == '__main__':
             model.cpu()
 
     # Load data
-    corpus = data.Corpus(args.data)
+    corpus = data.Corpus(args.data, args.length, args.dictname)
 
     test(model, corpus, args.cuda, prt=True)
