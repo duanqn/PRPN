@@ -150,4 +150,4 @@ if __name__ == '__main__':
     # Load data
     corpus = data.Corpus(args.data, args.length, args.dictname)
 
-    test(model, corpus, args.cuda, prt=True)
+    test(model, corpus, args.cuda, prt=True, length=args.testlen)
