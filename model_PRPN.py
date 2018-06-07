@@ -62,7 +62,7 @@ class PRPN(nn.Module):
 
         reader_state, parser_state, predictor_state = hidden_states  # memory_h: bsz, nslots, nhid
 
-        (memory_gate, memory_gate_next), gate, parser_state = self.parser(emb, parser_state)
+        #(memory_gate, memory_gate_next), gate, parser_state = self.parser(emb, parser_state)
 
         rmask = torch.autograd.Variable(torch.ones(self.nlayers, self.nhid))
         if input.is_cuda: rmask = rmask.cuda()
@@ -70,32 +70,32 @@ class PRPN(nn.Module):
 
         for i in range(input.size(0)):
             emb_i = emb[i]  # emb_i: bsz, nhid
-            attention = []
-            attention.append(memory_gate[i])
+            #attention = []
+            #attention.append(memory_gate[i])
 
             # summarize layer
             h_i = emb_i
             for j in range(self.nlayers):
                 hidden = reader_state[j]
 
-                h_i, new_memory, attention0 = self.reader[j](h_i, hidden, memory_gate[i], rmask[j])
+                h_i, new_memory, attention0 = self.reader[j](h_i, hidden, None, rmask[j])
 
                 # updata states
-                attention.append(attention0)
+                #attention.append(attention0)
                 reader_state[j] = new_memory
 
             # predict layer
             selected_memory_h, predictor_state, attention1 = self.predictor.attention(h_i, predictor_state,
-                                                                                      gate_time=memory_gate_next[i])
+                                                                                      gate_time=None)
             output_h.append(h_i)
             output_memory.append(selected_memory_h)
 
-            attention.append(memory_gate_next[i])
-            attention.append(attention1)
-            attentions.append(torch.stack(attention, dim=1))
+            #attention.append(memory_gate_next[i])
+            #attention.append(attention1)
+            #attentions.append(torch.stack(attention, dim=1))
 
-        self.attentions = torch.stack(attentions, dim=0)
-        self.gates = gate
+        #self.attentions = torch.stack(attentions, dim=0)
+        #self.gates = gate
 
         output_h = torch.stack(output_h, dim=0)
         output_memory = torch.stack(output_memory, dim=0)
