@@ -81,7 +81,7 @@ class PRPN(nn.Module):
                 h_i, new_memory, attention0 = self.reader[j](h_i, hidden, memory_gate[i], rmask[j])
 
                 # updata states
-                attention.append(attention0)
+                #attention.append(attention0)
                 reader_state[j] = new_memory
 
             # predict layer

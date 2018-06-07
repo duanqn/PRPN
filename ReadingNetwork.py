@@ -25,9 +25,9 @@ class ReadingNetwork(nn.Module):
         memory_h, memory_c = memory
 
         # attention
-        selected_memory_h, selected_memory_c, attention0 = self.attention(input, memory_h, memory_c,
-                                                                          gate=gate_time)
-
+        selected_memory_h = memory_h[:, 0, :]
+        selected_memory_c = memory_c[:, 0, :]
+        attention0 = None
         # recurrent
         input = self.drop(input)
         h_i, c_i = self.memory_rnn(input, (selected_memory_h * rmask, selected_memory_c))
