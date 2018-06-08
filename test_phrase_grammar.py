@@ -49,7 +49,7 @@ def mean(x):
     return sum(x) / len(x)
 
 
-def test(model, corpus, cuda, prt=False, length = 10):
+def test(model, corpus, cuda, prt=False, length = 10, prtList=[]):
     model.eval()
 
     print "Testing with len <= " + str(length)
@@ -94,7 +94,7 @@ def test(model, corpus, cuda, prt=False, length = 10):
         f1_list.append(f1)
 
         nsens += 1
-        if prt and nsens % 100 == 0:
+        if prt and nsens in prtList:
             # for i in range(len(sen)):
             #     print '%15s\t%.2f\t%s' % (sen[i], depth[i], str(attentions[i, 1]))
             print 'Model output:'
@@ -135,12 +135,22 @@ if __name__ == '__main__':
     parser.add_argument('--length', type=int, default=-1, help='Maximum sentence length')
     parser.add_argument('--dictname', type=str, default='dict.pkl', help='Dictionary file name')
     parser.add_argument('--testlen', type=int, default=10, help='Maximum number of words in test sentences')
+    parser.add_argument('--randfile', type=str, default='', help='File to load the random subset of sentences')
     args = parser.parse_args()
     torch.cuda.set_device(args.device)
 
     # Set the random seed manually for reproducibility.
     torch.manual_seed(args.seed)
 
+    printList = []
+    if args.randfile:
+        with open(args.randfile, 'r') as f:
+            while True:
+                line = f.readline()
+                if not line:
+                    break
+                printList.append(int(line))
+    print printList
     # Load model
     with open(args.checkpoint, 'rb') as f:
         model = torch.load(f)
@@ -153,4 +163,4 @@ if __name__ == '__main__':
     # Load data
     corpus = data.Corpus(args.data, args.length, args.dictname)
 
-    test(model, corpus, args.cuda, prt=True, length=args.testlen)
+    test(model, corpus, args.cuda, prt=True, length=args.testlen, prtList=printList)
