@@ -71,13 +71,18 @@ class Dictionary(object):
 
 
 class Corpus(object):
-    def __init__(self, path, maxlen, dictname):
+    def __init__(self, path, maxlen, dictname, droprate):
         dict_file_name = os.path.join(path, dictname)
         if os.path.exists(dict_file_name):
             print 'Using the dict ' + dict_file_name + ' !'
             self.dictionary = cPickle.load(open(dict_file_name, 'rb'))
         else:
             self.dictionary = Dictionary()
+            for fileid in train_file_ids:
+                if random.random() < droprate:
+                    train_file_ids.remove(fileid)
+            print '*** Files ***'
+            print train_file_ids
             self.add_words(train_file_ids)
             # self.add_words(valid_file_ids)
             # self.add_words(test_file_ids)
