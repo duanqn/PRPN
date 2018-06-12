@@ -49,6 +49,8 @@ class ParsingNetwork(nn.Module):
 
         g = g[:, :, 0]
         g_next = g_next[:, :, 0]
+        g = g.transpose(0, 1)
+        g_next = g_next.transpose(0, 1)
 
         print 'g size: ' + str(g.size())
         print 'cum_gate size: ' + str(cum_gate.size())
