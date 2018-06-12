@@ -43,7 +43,7 @@ class ParsingNetwork(nn.Module):
             h0 = h0.cuda()
 
         g, _hidden = self.g_current(emb, h0)  # bsz, 2, ntimestep
-        g_next, _hidden = self.g_apxnext(emb, h0)
+        g_next, _ = self.g_apxnext(emb, h0)
 
         g = g[:, :, 0]
         g_next = g_next[:, :, 0]
@@ -76,7 +76,7 @@ class ParsingNetwork(nn.Module):
         memory_gate_next = torch.cumprod(memory_gate_next, dim=2)  # bsz, ntimestep, nlookback+1
         memory_gate_next = torch.unbind(memory_gate_next, dim=1)
 
-        return (memory_gate, memory_gate_next), g, (emb_last[-self.nlookback:], cum_gate[:, -self.nslots:])
+        return (memory_gate, memory_gate_next), g, (_hidden, cum_gate[:, -self.nslots:])
 
     def init_hidden(self, bsz):
         weight = next(self.parameters()).data
