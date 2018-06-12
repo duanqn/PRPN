@@ -39,8 +39,8 @@ class ParsingNetwork(nn.Module):
 
         #print 'emb size: ' + str(emb.size())
 
-        #if emb.is_cuda:
-            #h0 = h0.cuda()
+        if emb.is_cuda:
+            h0 = h0.cuda()
 
         g, _hidden = self.g_current(emb, h0)  # bsz, 2, ntimestep
         g_next, _hidden = self.g_apxnext(emb, h0)
