@@ -43,6 +43,9 @@ class ParsingNetwork(nn.Module):
         h0 = Variable(torch.randn(4, bsz, 2))
         emb = emb.transpose(1, 2)
 
+        print type(emb)
+        print type(h0)
+
         gates, hidden = self.gate(emb, h0)  # bsz, 2, ntimestep
 
         gates = gates.transpose(1, 2)
