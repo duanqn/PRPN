@@ -32,17 +32,15 @@ class ParsingNetwork(nn.Module):
         self.g_apxnext = nn.RNN(ninp, 1, 2, nonlinearity = 'relu', batch_first = False, dropout = dropout, bidirectional = False)
 
     def forward(self, emb, parser_state):
-        emb_last, cum_gate = parser_state
+        h0, cum_gate = parser_state
         ntimestep = emb.size(0)
-        print 'ntimestep = ' + str(ntimestep)
+        #print 'ntimestep = ' + str(ntimestep)
         bsz = emb.size(1)
 
-        print 'emb size: ' + str(emb.size())
+        #print 'emb size: ' + str(emb.size())
 
-        h0 = Variable(torch.randn(2, bsz, 1))
-
-        if emb.is_cuda:
-            h0 = h0.cuda()
+        #if emb.is_cuda:
+            #h0 = h0.cuda()
 
         g, _hidden = self.g_current(emb, h0)  # bsz, 2, ntimestep
         g_next, _hidden = self.g_apxnext(emb, h0)
@@ -52,15 +50,15 @@ class ParsingNetwork(nn.Module):
         g = g.transpose(0, 1)
         g_next = g_next.transpose(0, 1)
 
-        print 'g size: ' + str(g.size())
-        print 'cum_gate size: ' + str(cum_gate.size())
+        #print 'g size: ' + str(g.size())
+        #print 'cum_gate size: ' + str(cum_gate.size())
 
         cum_gate = torch.cat([cum_gate, g], dim=1)
-        print 'cum_gate size: ' + str(cum_gate.size())
+        #print 'cum_gate size: ' + str(cum_gate.size())
         gate_hat = torch.stack([cum_gate[:, i:i + ntimestep] for i in range(self.nslots, 0, -1)],
                                dim=2)  # bsz, ntimestep, nslots
 
-        print 'gate_hat size: ' + str(gate_hat.size())
+        #print 'gate_hat size: ' + str(gate_hat.size())
         
         if self.hard:
             memory_gate = (F.hardtanh((g[:, :, None] - gate_hat) / self.resolution * 2 + 1) + 1) / 2
@@ -83,5 +81,5 @@ class ParsingNetwork(nn.Module):
     def init_hidden(self, bsz):
         weight = next(self.parameters()).data
         self.ones = Variable(weight.new(bsz, 1).zero_() + 1)
-        return Variable(weight.new(self.nlookback, bsz, self.ninp).zero_()), \
+        return Variable(torch.randn(2, bsz, 1)), \
                Variable(weight.new(bsz, self.nslots).zero_() + numpy.inf)
