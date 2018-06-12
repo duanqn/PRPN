@@ -57,8 +57,6 @@ class ParsingNetwork(nn.Module):
 
         print 'gate_hat size: ' + str(gate_hat.size())
         
-        
-
         if self.hard:
             memory_gate = (F.hardtanh((g[:, :, None] - gate_hat) / self.resolution * 2 + 1) + 1) / 2
         else:
