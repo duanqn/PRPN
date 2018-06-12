@@ -47,13 +47,17 @@ class ParsingNetwork(nn.Module):
         g, _hidden = self.g_current(emb, h0)  # bsz, 2, ntimestep
         g_next, _hidden = self.g_apxnext(emb, h0)
 
+        print 'g size: ' + str(g.size())
+        print 'cum_gate size: ' + str(cum_gate.size())
+
         cum_gate = torch.cat([cum_gate, g], dim=1)
+        print 'cum_gate size: ' + str(cum_gate.size())
         gate_hat = torch.stack([cum_gate[:, i:i + ntimestep] for i in range(self.nslots, 0, -1)],
                                dim=2)  # bsz, ntimestep, nslots
 
         print 'gate_hat size: ' + str(gate_hat.size())
-        print 'cum_gate size: ' + str(cum_gate.size())
-        print 'g size: ' + str(g.size())
+        
+        
 
         if self.hard:
             memory_gate = (F.hardtanh((g[:, :, None] - gate_hat) / self.resolution * 2 + 1) + 1) / 2
