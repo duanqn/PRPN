@@ -56,6 +56,9 @@ class ParsingNetwork(nn.Module):
         gate_hat = torch.stack([cum_gate[:, i:i + ntimestep] for i in range(self.nslots, 0, -1)],
                                dim=2)  # bsz, ntimestep, nslots
 
+        print 'gate_hat size: ' + str(gate_hat.size())
+        print 'cum_gate size: ' + str(cum_gate.size())
+
         if self.hard:
             memory_gate = (F.hardtanh((gate[:, :, None] - gate_hat) / self.resolution * 2 + 1) + 1) / 2
         else:
