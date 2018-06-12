@@ -39,7 +39,7 @@ class ParsingNetwork(nn.Module):
 
         print 'emb size: ' + str(emb.size())
 
-        h0 = Variable(torch.randn(4, bsz, 1))
+        h0 = Variable(torch.randn(2, bsz, 1))
 
         if emb.is_cuda:
             h0 = h0.cuda()
