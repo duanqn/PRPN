@@ -28,16 +28,25 @@ class ParsingNetwork(nn.Module):
                                   nn.Conv1d(nhid, 2, 1, groups=2),
                                   nn.Sigmoid())
         '''
-        self.gate = LSTMCell(ninp, 2, dropout = dropout)
+        self.gate = nn.RNN(ninp, 2, 2, nonlinearity = 'relu', batch_first = True, dropout = dropout, bidirectional = True)
 
     def forward(self, emb, parser_state):
         emb_last, cum_gate = parser_state
         ntimestep = emb.size(0)
+        bsz = emb.size(1)
 
         emb_last = torch.cat([emb_last, emb], dim=0)
+        print 'emb_last size: ' + str(emb_last.size())
         emb = emb_last.transpose(0, 1).transpose(1, 2)  # bsz, ninp, ntimestep + nlookback
+        print 'emb size: ' + str(emb.size())
+
+        h0 = Variable(torch.randn(4, bsz, 2))
+        emb = emb.transpose(1, 2)
 
         gates = self.gate(emb)  # bsz, 2, ntimestep
+
+        gates = gates.transpose(1, 2)
+        
         gate = gates[:, 0, :]
         gate_next = gates[:, 1, :]
         cum_gate = torch.cat([cum_gate, gate], dim=1)
