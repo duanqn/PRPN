@@ -49,8 +49,10 @@ def mean(x):
     return sum(x) / len(x)
 
 
-def test(model, corpus, cuda, prt=False):
+def test(model, corpus, cuda, prt=False, length = 10):
     model.eval()
+
+    print "Testing with len <= " + str(length)
 
     prec_list = []
     reca_list = []
@@ -58,7 +60,7 @@ def test(model, corpus, cuda, prt=False):
 
     nsens = 0
     for sen, sen_tree in zip(corpus.train_sens, corpus.train_trees):
-        if len(sen) > 12:
+        if len(sen) > length + 2:
             continue
         x = numpy.array([corpus.dictionary[w] for w in sen])
         input = Variable(torch.LongTensor(x[:, None]))
@@ -128,7 +130,13 @@ if __name__ == '__main__':
                         help='random seed')
     parser.add_argument('--cuda', action='store_true',
                         help='use CUDA')
+    parser.add_argument('--device', type=int, default=0,
+                    help='select GPU')
+    parser.add_argument('--length', type=int, default=-1, help='Maximum sentence length')
+    parser.add_argument('--dictname', type=str, default='dict.pkl', help='Dictionary file name')
+    parser.add_argument('--testlen', type=int, default=10, help='Maximum number of words in test sentences')
     args = parser.parse_args()
+    torch.cuda.set_device(args.device)
 
     # Set the random seed manually for reproducibility.
     torch.manual_seed(args.seed)
@@ -143,6 +151,6 @@ if __name__ == '__main__':
             model.cpu()
 
     # Load data
-    corpus = data.Corpus(args.data)
+    corpus = data.Corpus(args.data, args.length, args.dictname)
 
-    test(model, corpus, args.cuda, prt=True)
+    test(model, corpus, args.cuda, prt=True, length=args.testlen)

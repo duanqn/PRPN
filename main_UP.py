@@ -66,6 +66,9 @@ parser.add_argument('--model', type=str, default='new_gate',
                     help='type of model to use')
 parser.add_argument('--device', type=int, default=0,
                     help='select GPU')
+parser.add_argument('--length', type=int, default=-1, help='Maximum sentence length')
+parser.add_argument('--dictname', type=str, default='dict.pkl', help='Dictionary file name')
+parser.add_argument('--testlen', type=int, default=10, help='Maximum number of words in test sentences')
 args = parser.parse_args()
 
 torch.cuda.set_device(args.device)
@@ -82,8 +85,7 @@ if torch.cuda.is_available():
 # Load data
 ###############################################################################
 
-corpus = data.Corpus(args.data)
-
+corpus = data.Corpus(args.data, args.length, args.dictname)
 
 def batchify(data, bsz):
     # Work out how cleanly we can divide the dataset into bsz parts.
@@ -229,7 +231,7 @@ try:
     for epoch in range(1, args.epochs + 1):
         epoch_start_time = time.time()
         train_loss = train()
-        test_f1 = test(model, corpus, args.cuda)
+        test_f1 = test(model, corpus, args.cuda, length=args.testlen)
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | train loss {:5.2f} | test f1 {:5.2f}'.format(
             epoch, (time.time() - epoch_start_time), train_loss, test_f1))
@@ -250,7 +252,7 @@ with open(args.save, 'rb') as f:
     model = torch.load(f)
 
 # Run on test data.
-test_f1 = test(model, corpus, args.cuda)
+test_f1 = test(model, corpus, args.cuda, length=args.testlen)
 print('=' * 89)
 print('| End of training | test f1 {:5.2f}'.format(
     test_f1))
