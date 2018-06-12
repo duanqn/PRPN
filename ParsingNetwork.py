@@ -33,6 +33,8 @@ class ParsingNetwork(nn.Module):
     def forward(self, emb, parser_state):
         emb_last, cum_gate = parser_state
         ntimestep = emb.size(0)
+        print 'ntimestep = ' + str(ntimestep)
+        print 'emb size: ' + str(emb.size())
         bsz = emb.size(1)
 
         emb_last = torch.cat([emb_last, emb], dim=0)
