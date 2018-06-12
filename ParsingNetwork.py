@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
+from LSTMCell import LSTMCell
 
 
 class ParsingNetwork(nn.Module):
@@ -19,13 +20,15 @@ class ParsingNetwork(nn.Module):
         self.drop = nn.Dropout(dropout)
 
         # Attention layers
-        self.gate = nn.Sequential(nn.Dropout(dropout),
+        '''self.gate = nn.Sequential(nn.Dropout(dropout),
                                   nn.Conv1d(ninp, nhid, (nlookback + 1)),
                                   nn.BatchNorm1d(nhid),
                                   nn.ReLU(),
                                   nn.Dropout(dropout),
                                   nn.Conv1d(nhid, 2, 1, groups=2),
                                   nn.Sigmoid())
+        '''
+        self.gate = LSTMCell(ninp, 2, dropout = dropout)
 
     def forward(self, emb, parser_state):
         emb_last, cum_gate = parser_state
