@@ -139,10 +139,21 @@ if args.cuda:
 # criterion = nn.CrossEntropyLoss()
 def criterion(input, targets, targets_mask):
     targets_mask = targets_mask.view(-1)
-    input = input.view(-1, ntokens)
-    input = F.log_softmax(input)
-    loss = torch.gather(input, 1, targets[:, None]).view(-1)
-    loss = (-loss * targets_mask).sum() / targets_mask.sum()
+    input = input.view(-1, ntokens) # num_words by ntokens
+    print input.size()
+    print targets.size()
+    input.exp_() # num_words by ntokens
+    in_sentence_only = torch.index_select(input, 1, targets) # num_words by (num_words - 1)
+    print in_sentence_only.size()
+    # Redundant: in_sentence_only = in_sentence_only * targets_mask[:, None]
+    tempsum = torch.sum(in_sentence_only, 1, keepdim = True)
+    in_sentence_only.div_(tempsum[:, None]) # num_words by (num_words - 1)
+    in_sentence_only.log_() # num_words by (num_words - 1)
+    in_sentence_only = in_sentence_only[:-1, :] # (num_words - 1) by (num_words - 1)
+    loss = in_sentence_only.diag()
+    #input = F.log_softmax(input)
+    #loss = torch.gather(input, 1, targets[:, None]).view(-1)
+    loss = (-loss).sum() / targets_mask.sum()
     return loss
 
 
