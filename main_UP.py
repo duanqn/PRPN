@@ -10,6 +10,7 @@ import torch.optim.lr_scheduler as lr_scheduler
 from torch.autograd import Variable
 
 import data_ptb
+import data_train
 from model_PRPN import PRPN
 from test_phrase_grammar import test
 
@@ -87,7 +88,8 @@ if torch.cuda.is_available():
 # Load data
 ###############################################################################
 
-corpus = data.Corpus(args.data, args.length, args.dictname)
+corpus_test = data_ptb.Corpus(args.data, args.length, args.dictname)
+corpus_train = data_train.Corpus(args.data, args.legnth, args.dictname)
 
 def batchify(data, bsz):
     # Work out how cleanly we can divide the dataset into bsz parts.
@@ -121,15 +123,13 @@ def batchify(data, bsz):
 
 
 eval_batch_size = 64
-train_data = batchify(corpus.train, args.batch_size)
-val_data = batchify(corpus.valid, eval_batch_size)
-test_data = batchify(corpus.test, eval_batch_size)
+train_data = batchify(corpus_train.train, args.batch_size)
 
 ###############################################################################
 # Build the model
 ###############################################################################
 
-ntokens = len(corpus.dictionary)
+ntokens = len(corpus_train.dictionary)
 model = PRPN(ntokens, args.emsize, args.nhid, args.nlayers,
              args.nslots, args.nlookback, args.resolution,
              args.dropout, args.idropout, args.rdropout,
@@ -175,7 +175,7 @@ def evaluate(data_source):
     # Turn on evaluation mode which disables dropout.
     model.eval()
     total_loss = 0
-    ntokens = len(corpus.dictionary)
+    ntokens = len(corpus_train.dictionary)
     for i in range(len(data_source)):
         data, targets, mask = get_batch(data_source, i, evaluation=True)
         hidden = model.init_hidden(eval_batch_size)
@@ -191,7 +191,7 @@ def train():
     total_loss = 0
     train_loss = 0
     start_time = time.time()
-    ntokens = len(corpus.dictionary)
+    ntokens = len(corpus_train.dictionary)
     for batch in range(len(train_data)):
         data, targets, mask = get_batch(train_data, batch)
         # Starting each batch, we detach the hidden state from how it was previously produced.
@@ -233,7 +233,7 @@ try:
     for epoch in range(1, args.epochs + 1):
         epoch_start_time = time.time()
         train_loss = train()
-        test_f1 = test(model, corpus, args.cuda, length=args.testlen)
+        test_f1 = test(model, corpus_test, args.cuda, length=args.testlen)
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | train loss {:5.2f} | test f1 {:5.2f}'.format(
             epoch, (time.time() - epoch_start_time), train_loss, test_f1))
@@ -254,7 +254,7 @@ with open(args.save, 'rb') as f:
     model = torch.load(f)
 
 # Run on test data.
-test_f1 = test(model, corpus, args.cuda, length=args.testlen)
+test_f1 = test(model, corpus_test, args.cuda, length=args.testlen)
 print('=' * 89)
 print('| End of training | test f1 {:5.2f}'.format(
     test_f1))
