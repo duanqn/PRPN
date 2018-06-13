@@ -66,7 +66,7 @@ class Corpus(object):
             self.dictionary = cPickle.load(open(dict_file_name, 'rb'))
         else:
             self.dictionary = Dictionary()
-            self.add_words(file_ids)
+            self.add_words(file_ids, maxlen)
             self.dictionary.rebuild_by_freq()
             cPickle.dump(self.dictionary, open(dict_file_name, 'wb'))
 
@@ -85,7 +85,7 @@ class Corpus(object):
                 words.append(w)
         return words
 
-    def add_words(self, file_ids):
+    def add_words(self, file_ids, maxlen):
         print 'add_words'
         # Add words to the dictionary
         for id in file_ids:
