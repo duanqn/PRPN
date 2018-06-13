@@ -90,12 +90,15 @@ class Corpus(object):
         # Add words to the dictionary
         for id in file_ids:
             # print "Processing " + id
-            sentences = ptb.parsed_sents(id)
-            for sen_tree in sentences:
-                words = self.filter_words(sen_tree)
-                words = ['<s>'] + words + ['</s>']
-                for word in words:
-                    self.dictionary.add_word(word)
+            with open(id, 'r') as f:
+                for line in f:
+                    words = line.strip().split()
+                    words = ['<s>'] + words + ['</s>']
+                    if maxlen != -1:
+                        if len(words) > maxlen + 2:	# <s> and </s>
+                            continue
+                    for word in words:
+                        self.dictionary.add_word(word)
 
     def tokenize(self, file_ids, maxlen):
 
