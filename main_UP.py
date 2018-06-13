@@ -9,7 +9,7 @@ import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 from torch.autograd import Variable
 
-import data_ptb as data
+import data_ptb
 from model_PRPN import PRPN
 from test_phrase_grammar import test
 
