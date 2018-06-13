@@ -14,8 +14,10 @@ from model_PRPN import PRPN
 from test_phrase_grammar import test
 
 parser = argparse.ArgumentParser(description='PyTorch PennTreeBank RNN/LSTM Language Model')
-parser.add_argument('--data', type=str, default='./data/ptb',
+parser.add_argument('--data', type=str, default='./data/penn',
                     help='location of the data corpus')
+parser.add_argument('--testdata', type=str, default='./data/ptb',
+                    help='location of the parsed data')
 parser.add_argument('--emsize', type=int, default=200,
                     help='size of word embeddings')
 parser.add_argument('--nhid', type=int, default=400,
