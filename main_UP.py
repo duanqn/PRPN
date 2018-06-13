@@ -71,6 +71,7 @@ parser.add_argument('--device', type=int, default=0,
                     help='select GPU')
 parser.add_argument('--length', type=int, default=-1, help='Maximum sentence length')
 parser.add_argument('--dictname', type=str, default='dict.pkl', help='Dictionary file name')
+parser.add_argument('--testdict', type=str, default='dict.pkl', help='Dictionary file name')
 parser.add_argument('--testlen', type=int, default=10, help='Maximum number of words in test sentences')
 args = parser.parse_args()
 
@@ -88,7 +89,7 @@ if torch.cuda.is_available():
 # Load data
 ###############################################################################
 
-corpus_test = data_ptb.Corpus(args.testdata, args.length, args.dictname)
+corpus_test = data_ptb.Corpus(args.testdata, args.length, args.testdict)
 corpus_train = data_train.Corpus(args.data, args.length, args.dictname)
 
 def batchify(data, bsz):
