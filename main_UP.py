@@ -88,7 +88,7 @@ if torch.cuda.is_available():
 # Load data
 ###############################################################################
 
-corpus_test = data_ptb.Corpus(args.data, args.length, args.dictname)
+corpus_test = data_ptb.Corpus(args.testdata, args.length, args.dictname)
 corpus_train = data_train.Corpus(args.data, args.legnth, args.dictname)
 
 def batchify(data, bsz):
