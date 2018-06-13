@@ -29,7 +29,7 @@ class ParsingNetwork(nn.Module):
                                   nn.Conv1d(nhid, 2, 1, groups=2),
                                   nn.Sigmoid())
         '''
-        self.rnn = nn.LSTM(ninp, nhid, nlayers, batch_first = False, dropout = dropout, bidirectional = True)
+        self.rnn = nn.LSTM(ninp, nhid, self.nlayers, batch_first = False, dropout = dropout, bidirectional = True)
         self.postnn = nn.Linear(nhid * 2, 1)
         self.postnn_next = nn.Linear(nhid * 2, 1)
 
