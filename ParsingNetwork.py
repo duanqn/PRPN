@@ -88,6 +88,6 @@ class ParsingNetwork(nn.Module):
     def init_hidden(self, bsz):
         weight = next(self.parameters()).data
         self.ones = Variable(weight.new(bsz, 1).zero_() + 1)
-        return  Variable(torch.randn(2, bsz, nhid).zero_()), \
-                Variable(torch.randn(2, bsz, nhid).zero_()), \
+        return  Variable(weight.new(2, bsz, self.nhid).zero_()), \
+                Variable(weight.new(2, bsz, self.nhid).zero_()), \
                 Variable(weight.new(bsz, self.nslots).zero_() + numpy.inf)
