@@ -47,7 +47,8 @@ class ParsingNetwork(nn.Module):
         if emb.is_cuda and not cell.is_cuda:
             cell = cell.cuda()
 
-        intermediate, hidden_n, cell_n = self.rnn(emb, hidden, cell)  # ntimestep, batchsize, vector_length
+        intermediate, hc = self.rnn(emb, (hidden, cell))  # ntimestep, batchsize, vector_length
+        hidden_n, cell_n = hc
 
         g = self.postnn(intermediate)
         g_next = self.postnn_next(intermediate)
