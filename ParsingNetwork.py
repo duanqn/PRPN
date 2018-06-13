@@ -12,6 +12,7 @@ class ParsingNetwork(nn.Module):
 
         self.nhid = nhid
         self.ninp = ninp
+        self.nlayers = 1
         self.nslots = nslots
         self.nlookback = nlookback
         self.resolution = resolution
@@ -28,22 +29,28 @@ class ParsingNetwork(nn.Module):
                                   nn.Conv1d(nhid, 2, 1, groups=2),
                                   nn.Sigmoid())
         '''
-        self.g_current = nn.RNN(ninp, 1, 2, nonlinearity = 'relu', batch_first = False, dropout = dropout, bidirectional = False)
-        self.g_apxnext = nn.RNN(ninp, 1, 2, nonlinearity = 'relu', batch_first = False, dropout = dropout, bidirectional = False)
+        self.rnn = nn.LSTM(ninp, nhid, nlayers, batch_first = False, dropout = dropout, bidirectional = True)
+        self.postnn = nn.Linear(nhid * 2, 1)
+        self.postnn_next = nn.Linear(nhid * 2, 1)
 
     def forward(self, emb, parser_state):
-        h0, cum_gate = parser_state
+        hidden, cell, cum_gate = parser_state
         ntimestep = emb.size(0)
-        #print 'ntimestep = ' + str(ntimestep)
+        print 'ntimestep = ' + str(ntimestep)
         bsz = emb.size(1)
 
-        #print 'emb size: ' + str(emb.size())
+        print 'ninp value: ' + str(ninp)
+        print 'emb size: ' + str(emb.size())
 
-        if emb.is_cuda and not h0.is_cuda:
-            h0 = h0.cuda()
+        if emb.is_cuda and not hidden.is_cuda:
+            hidden = hidden.cuda()
+        if emb.is_cuda and not cell.is_cuda:
+            cell = cell.cuda()
 
-        g, _hidden = self.g_current(emb, h0)  # bsz, 2, ntimestep
-        g_next, _ = self.g_apxnext(emb, h0)
+        intermediate, hidden_n, cell_n = self.rnn(emb, hidden, cell)  # ntimestep, batchsize, vector_length
+
+        g = self.postnn(intermediate)
+        g_next = self.postnn_next(intermediate)
 
         g = g[:, :, 0]
         g_next = g_next[:, :, 0]
@@ -76,10 +83,11 @@ class ParsingNetwork(nn.Module):
         memory_gate_next = torch.cumprod(memory_gate_next, dim=2)  # bsz, ntimestep, nlookback+1
         memory_gate_next = torch.unbind(memory_gate_next, dim=1)
 
-        return (memory_gate, memory_gate_next), g, (_hidden, cum_gate[:, -self.nslots:])
+        return (memory_gate, memory_gate_next), g, (hidden_n, cell_n, cum_gate[:, -self.nslots:])
 
     def init_hidden(self, bsz):
         weight = next(self.parameters()).data
         self.ones = Variable(weight.new(bsz, 1).zero_() + 1)
-        return Variable(torch.randn(2, bsz, 1)), \
-               Variable(weight.new(bsz, self.nslots).zero_() + numpy.inf)
+        return  Variable(torch.randn(2, bsz, nhid).zero_()), \
+                Variable(torch.randn(2, bsz, nhid).zero_()), \
+                Variable(weight.new(bsz, self.nslots).zero_() + numpy.inf)
