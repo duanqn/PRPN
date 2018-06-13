@@ -89,7 +89,7 @@ if torch.cuda.is_available():
 ###############################################################################
 
 corpus_test = data_ptb.Corpus(args.testdata, args.length, args.dictname)
-corpus_train = data_train.Corpus(args.data, args.legnth, args.dictname)
+corpus_train = data_train.Corpus(args.data, args.length, args.dictname)
 
 def batchify(data, bsz):
     # Work out how cleanly we can divide the dataset into bsz parts.
