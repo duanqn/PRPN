@@ -146,7 +146,7 @@ def criterion(input, targets, targets_mask):
     in_sentence_only = torch.index_select(expinput, 1, targets) # num_words by (num_words - 1)
     print in_sentence_only.size()
     in_sentence_only = in_sentence_only * targets_mask[:, None]
-    tempsum = torch.sum(in_sentence_only, 1, keepdim = True)
+    tempsum = torch.sum(in_sentence_only, 1, keepdim = False)
     softmax = in_sentence_only.div(tempsum[:, None]) # num_words by num_words
     softmax.log_() # num_words by num_words
     #in_sentence_only = in_sentence_only[:-1, :] #
