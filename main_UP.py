@@ -142,8 +142,8 @@ def criterion(input, targets, targets_mask):
     input = input.view(-1, ntokens) # num_words by ntokens
     print input.size()
     print targets.size()
-    input.exp_() # num_words by ntokens
-    in_sentence_only = torch.index_select(input, 1, targets) # num_words by (num_words - 1)
+    expinput = input.exp() # num_words by ntokens
+    in_sentence_only = torch.index_select(expinput, 1, targets) # num_words by (num_words - 1)
     print in_sentence_only.size()
     # Redundant: in_sentence_only = in_sentence_only * targets_mask[:, None]
     tempsum = torch.sum(in_sentence_only, 1, keepdim = True)
