@@ -153,7 +153,7 @@ def criterion(input, targets, targets_mask):
     #print type(softmax)
     softmax.data.log_() # num_words by num_words
     #in_sentence_only = in_sentence_only[:-1, :] #
-    loss = in_sentence_only.diag()
+    loss = softmax.diag()
     #input = F.log_softmax(input)
     #loss = torch.gather(input, 1, targets[:, None]).view(-1)
     loss = (-loss * targets_mask).sum() / targets_mask.sum()
