@@ -148,11 +148,11 @@ def criterion(input, targets, targets_mask):
 
     for j in range(0, bsz):
         for i in range(0, maxlength):
-            if targets_mask[i, j] > 0:
+            if targets_mask.data[i, j] > 0:
                 for k in range(i, maxlength):   # targets[i, j] is the word right after i in the sentence j
-                    if targets_mask[k, j] > 0:
+                    if targets_mask.data[k, j] > 0:
                         mask[i, j, targets[k,j]] = 1
-        
+    mask = Variable(mask)
     input = input.exp() # num_words by ntokens
     in_sentence_only = input * mask # maxlen, bsz, ntokens
     #print in_sentence_only.size()
