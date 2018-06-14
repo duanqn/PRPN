@@ -138,26 +138,35 @@ if args.cuda:
 
 # criterion = nn.CrossEntropyLoss()
 def criterion(input, targets, targets_mask):
-    targets_mask = targets_mask.view(-1)
-    input = input.view(-1, ntokens) # num_words by ntokens
+    bsz = args.batch_size
+    targets = targets.view(-1, bsz)
+    input = input.view(-1, bsz, ntokens) # num_words by ntokens
+    maxlength = input.size(0)
     #print input.size()
     #print targets.size()
-    expinput = input.exp() # num_words by ntokens
-    in_sentence_only = torch.index_select(expinput, 1, targets) # num_words by (num_words - 1)
+    mask = torch.LongTensor(maxlength, bsz, ntokens).zero_()
+
+    for j in range(0, bsz):
+        for i in range(0, maxlength):
+            if targets_mask[i, j] > 0:
+                for k in range(i, maxlength):   # targets[i, j] is the word right after i in the sentence j
+                    if targets_mask[k, j] > 0:
+                        mask[i, j, targets[k,j]] = 1
+        
+    input = input.exp() # num_words by ntokens
+    in_sentence_only = input * mask # maxlen, bsz, ntokens
     #print in_sentence_only.size()
-    in_sentence_only = in_sentence_only * targets_mask[:, None]
-    tempsum = torch.sum(in_sentence_only, 1, keepdim = False)
+    tempsum = torch.sum(in_sentence_only, 2, keepdim = False)
     #print type(in_sentence_only)
     #print in_sentence_only.size()
-    softmax = in_sentence_only.div(tempsum[:, None]) # num_words by num_words
+    softmax = in_sentence_only.div(tempsum[:, :, None]) # num_words by num_words
     #print type(softmax)
     softmax.data.log_() # num_words by num_words
-    #in_sentence_only = in_sentence_only[:-1, :] #
-    loss = softmax.diag()
     #input = F.log_softmax(input)
-    #loss = torch.gather(input, 1, targets[:, None]).view(-1)
+    loss = torch.gather(softmax, 2, targets[:, :, None]).view(-1)
+    targets_mask = targets_mask.view(-1)
     loss = (-loss * targets_mask).sum() / targets_mask.sum()
-    print 'loss = ' + str(loss)
+    print 'loss = ' + str(loss.data[0])
     return loss
 
 
