@@ -140,17 +140,17 @@ if args.cuda:
 def criterion(input, targets, targets_mask):
     targets_mask = targets_mask.view(-1)
     input = input.view(-1, ntokens) # num_words by ntokens
-    print input.size()
-    print targets.size()
+    #print input.size()
+    #print targets.size()
     expinput = input.exp() # num_words by ntokens
     in_sentence_only = torch.index_select(expinput, 1, targets) # num_words by (num_words - 1)
-    print in_sentence_only.size()
+    #print in_sentence_only.size()
     in_sentence_only = in_sentence_only * targets_mask[:, None]
     tempsum = torch.sum(in_sentence_only, 1, keepdim = False)
-    print type(in_sentence_only)
-    print in_sentence_only.size()
+    #print type(in_sentence_only)
+    #print in_sentence_only.size()
     softmax = in_sentence_only.div(tempsum[:, None]) # num_words by num_words
-    print type(softmax)
+    #print type(softmax)
     softmax.data.log_() # num_words by num_words
     #in_sentence_only = in_sentence_only[:-1, :] #
     loss = in_sentence_only.diag()
