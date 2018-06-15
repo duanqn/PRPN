@@ -241,6 +241,8 @@ def train():
         optimizer.zero_grad()
         output, _ = model(data, hidden)
         loss = criterion(output.view(-1, ntokens), targets, mask)
+        print 'Loss returned:'
+        print loss
         loss.backward()
 
         # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
