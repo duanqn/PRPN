@@ -174,6 +174,10 @@ def criterion(input, targets, targets_mask):
     print 'softmax'
     print softmax.data[0, 0, :]
     softmax.data.log_() # num_words by num_words
+    print 'softmax'
+    print softmax.data[0, 0, :]
+    print 'targets'
+    print targets.data[0, 0]
     #input = F.log_softmax(input)
     loss = torch.gather(softmax, 2, targets[:, :, None]).view(-1)
     targets_mask = targets_mask.view(-1)
