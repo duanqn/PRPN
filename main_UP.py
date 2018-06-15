@@ -175,7 +175,7 @@ def criterion(input, targets, targets_mask):
     softmax = in_sentence_only.log() # num_words by num_words
     print 'softmax'
     print softmax.data[0, 0, :]
-    softmax = softmax - tempsum[:, :, None] # num_words by num_words
+    softmax = softmax - tempsum_log[:, :, None] # num_words by num_words
     #print type(softmax)
     print 'targets'
     print targets.data[0, 0]
