@@ -155,14 +155,24 @@ def criterion(input, targets, targets_mask):
                     if targets_mask.data[k, j] > 0:
                         mask[i, j, targets.data[k,j]] = 1
     mask = Variable(mask)
+    print 'input'
+    print input.data[0, 0, 0]
     input = input.exp() # num_words by ntokens
+    print 'input'
+    print input.data[0, 0, :]
     in_sentence_only = input * mask # maxlen, bsz, ntokens
+    print 'in_sentence_only'
+    print in_sentence_only.data[0, 0, :]
     #print in_sentence_only.size()
     tempsum = torch.sum(in_sentence_only, 2, keepdim = False)
+    print 'tempsum'
+    print tempsum.data[0, 0]
     #print type(in_sentence_only)
     #print in_sentence_only.size()
     softmax = in_sentence_only.div(tempsum[:, :, None]) # num_words by num_words
     #print type(softmax)
+    print 'softmax'
+    print softmax.data[0, 0, :]
     softmax.data.log_() # num_words by num_words
     #input = F.log_softmax(input)
     loss = torch.gather(softmax, 2, targets[:, :, None]).view(-1)
