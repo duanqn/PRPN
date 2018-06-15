@@ -182,6 +182,9 @@ def criterion(input, targets, targets_mask):
     print softmax.data[0, 0, targets.data[0, 0]]
     #input = F.log_softmax(input)
     zero = Variable(torch.FloatTensor([0]))
+    if softmax.is_cuda:
+        zero = zero.cuda()
+    print softmax.size()
     softmax[:, :, 0] = zero[None, None, 0]  # set the 0-th element to 0 (instead of -inf)
     loss = torch.gather(softmax, 2, targets[:, :, None]).view(-1)
     targets_mask = targets_mask.view(-1)
