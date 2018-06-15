@@ -145,18 +145,20 @@ def criterion(input, targets, targets_mask):
     #print input.size()
     #print targets.size()
     mask = torch.FloatTensor(maxlength, bsz, ntokens).zero_()
-    if input.is_cuda:
-        mask = mask.cuda()
-
     for j in range(0, bsz):
         for i in range(0, maxlength):
             if targets_mask.data[i, j] > 0:
                 for k in range(i, maxlength):   # targets[i, j] is the word right after i in the sentence j
                     if targets_mask.data[k, j] > 0:
                         mask[i, j, targets.data[k,j]] = 1
+    if input.is_cuda:
+        mask = mask.cuda()
     mask = Variable(mask)
     print 'input'
     print input.data[0, 0, 0]
+    input_max, _ = torch.max(input.data, dim=2)
+    input_max = Variable(input_max)
+    input = input - input_max[:, :, None]
     input = input.exp() # num_words by ntokens
     print 'input'
     print input.data[0, 0, :]
@@ -169,13 +171,14 @@ def criterion(input, targets, targets_mask):
     print tempsum.data[0, 0]
     #print type(in_sentence_only)
     #print in_sentence_only.size()
-    softmax = in_sentence_only.div(tempsum[:, :, None]) # num_words by num_words
+    tempsum_log = tempsum.log()
+    print 'softmax'
+    print softmax.data[0, 0, :]
+    softmax = in_sentence_only.log() # num_words by num_words
+    print 'softmax'
+    print softmax.data[0, 0, :]
+    softmax = softmax - tempsum[:, :, None] # num_words by num_words
     #print type(softmax)
-    print 'softmax'
-    print softmax.data[0, 0, :]
-    softmax.data.log_() # num_words by num_words
-    print 'softmax'
-    print softmax.data[0, 0, :]
     print 'targets'
     print targets.data[0, 0]
     print 'to_gather'
