@@ -145,6 +145,8 @@ def criterion(input, targets, targets_mask):
     #print input.size()
     #print targets.size()
     mask = torch.FloatTensor(maxlength, bsz, ntokens).zero_()
+    if input.is_cuda:
+        mask = mask.cuda()
 
     for j in range(0, bsz):
         for i in range(0, maxlength):
