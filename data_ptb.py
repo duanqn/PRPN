@@ -73,18 +73,13 @@ class Dictionary(object):
 
 
 class Corpus(object):
-    def __init__(self, path, maxlen, dictname, droprate):
+    def __init__(self, path, maxlen, dictname, sent_filter):
         dict_file_name = os.path.join(path, dictname)
         if os.path.exists(dict_file_name):
             print 'Using the dict ' + dict_file_name + ' !'
             self.dictionary = cPickle.load(open(dict_file_name, 'rb'))
         else:
             self.dictionary = Dictionary()
-            for fileid in train_file_ids:
-                if random.random() < droprate:
-                    train_file_ids.remove(fileid)
-            print '*** Files ***'
-            print train_file_ids
             self.add_words(train_file_ids)
             # self.add_words(valid_file_ids)
             # self.add_words(test_file_ids)
@@ -92,11 +87,11 @@ class Corpus(object):
             cPickle.dump(self.dictionary, open(dict_file_name, 'wb'))
 
 
-        self.train, self.train_sens, self.train_trees = self.tokenize(train_file_ids, maxlen)
+        self.train, self.train_sens, self.train_trees = self.tokenize(train_file_ids, maxlen, sent_filter)
         print str(len(self.train_sens)) + " sentences"
-        self.valid, self.valid_sens, self.valid_trees = self.tokenize(valid_file_ids, maxlen)
-        self.test, self.test_sens, self.test_trees = self.tokenize(test_file_ids, maxlen)
-        self.rest, self.rest_sens, self.rest_trees = self.tokenize(rest_file_ids, maxlen)
+        self.valid, self.valid_sens, self.valid_trees = self.tokenize(valid_file_ids, maxlen, sent_filter)
+        self.test, self.test_sens, self.test_trees = self.tokenize(test_file_ids, maxlen, sent_filter)
+        self.rest, self.rest_sens, self.rest_trees = self.tokenize(rest_file_ids, maxlen, sent_filter)
 
     def filter_words(self, tree):
         words = []
@@ -121,7 +116,7 @@ class Corpus(object):
                 for word in words:
                     self.dictionary.add_word(word)
 
-    def tokenize(self, file_ids, maxlen):
+    def tokenize(self, file_ids, maxlen, sent_filter):
 
         def tree2list(tree):
             if isinstance(tree, nltk.Tree):
@@ -142,9 +137,15 @@ class Corpus(object):
         sens_idx = []
         sens = []
         trees = []
+        counter = 0
         for id in file_ids:
             sentences = ptb.parsed_sents(id)
             for sen_tree in sentences:
+                if len(sent_filter) > 0:
+                    if not counter in sent_filter:
+                        counter += 1
+                        continue
+                counter += 1
                 words = self.filter_words(sen_tree)
                 words = ['<s>'] + words + ['</s>']
                 if maxlen != -1:

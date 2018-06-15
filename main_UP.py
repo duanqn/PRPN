@@ -69,8 +69,8 @@ parser.add_argument('--device', type=int, default=0,
 parser.add_argument('--length', type=int, default=-1, help='Maximum sentence length')
 parser.add_argument('--dictname', type=str, default='dict.pkl', help='Dictionary file name')
 parser.add_argument('--testlen', type=int, default=10, help='Maximum number of words in test sentences')
-parser.add_argument('--reduce', type=float, default=0,
-                    help='reduce data')
+parser.add_argument('--filter', type=str, default='',
+                    help='Sentence filter')
 args = parser.parse_args()
 
 torch.cuda.set_device(args.device)
@@ -87,7 +87,13 @@ if torch.cuda.is_available():
 # Load data
 ###############################################################################
 
-corpus = data.Corpus(args.data, args.length, args.dictname, args.reduce)
+filter_list = []
+if os.path.isfile(args.filter):
+    with open(args.filter, 'r') as f:
+        for line in f:
+            filter_list.append(int(line))
+
+corpus = data.Corpus(args.data, args.length, args.dictname, filter_list)
 
 def batchify(data, bsz):
     # Work out how cleanly we can divide the dataset into bsz parts.
