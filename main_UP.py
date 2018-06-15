@@ -144,7 +144,7 @@ def criterion(input, targets, targets_mask):
     maxlength = input.size(0)
     #print input.size()
     #print targets.size()
-    mask = torch.LongTensor(maxlength, bsz, ntokens).zero_()
+    mask = torch.FloatTensor(maxlength, bsz, ntokens).zero_()
 
     for j in range(0, bsz):
         for i in range(0, maxlength):
