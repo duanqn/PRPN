@@ -108,10 +108,6 @@ def batchify(data, bsz):
             input[:len(x), idx] = x
             mask[:len(x) - 1, idx] = 1
             target[:len(x) - 1, idx] = x[1:]
-        if args.cuda:
-            input = input.cuda()
-            mask = mask.cuda()
-            target = target.cuda()
         return input, mask, target.view(-1)
 
     data_batched = []
@@ -195,6 +191,10 @@ def train():
     ntokens = len(corpus_train.dictionary)
     for batch in range(len(train_data)):
         data, targets, mask = get_batch(train_data, batch)
+        if args.cuda:
+            data = data.cuda()
+            mask = mask.cuda()
+            targets = targets.cuda()
         # Starting each batch, we detach the hidden state from how it was previously produced.
         # If we didn't, the model would try backpropagating all the way to start of the dataset.
         hidden = model.init_hidden(args.batch_size)
