@@ -189,7 +189,7 @@ def criterion(input, targets, targets_mask):
     #input = F.log_softmax(input)
     #softmax[:, :, 0] = 0  # set the 0-th element to 0 (instead of -inf)
     softmax = softmax.view(-1)
-    mask_2 = mask_2.view(-1)
+    mask_2 = Variable(mask_2.view(-1))
     loss = torch.masked_select(softmax, mask_2)
     targets_mask = targets_mask.view(-1)
     loss = (-loss).sum() / targets_mask.sum()
