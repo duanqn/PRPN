@@ -145,14 +145,19 @@ def criterion(input, targets, targets_mask):
     #print input.size()
     #print targets.size()
     mask = torch.FloatTensor(maxlength, bsz, ntokens).zero_()
+    mask_2 = torch.ByteTensor(maxlength, bsz, ntokens).zero_() # for masked_select
     for j in range(0, bsz):
         for i in range(0, maxlength):
             if targets_mask.data[i, j] > 0:
+                mask_2[i, j, targets.data[i, j]] = 1
                 for k in range(i, maxlength):   # targets[i, j] is the word right after i in the sentence j
                     if targets_mask.data[k, j] > 0:
                         mask[i, j, targets.data[k,j]] = 1
+            else:
+                mask[i, j, 0] = 1
     if input.is_cuda:
         mask = mask.cuda()
+        mask_2 = mask_2.cuda()
     mask = Variable(mask)
     print 'input'
     print input.data[0, 0, 0]
@@ -182,10 +187,12 @@ def criterion(input, targets, targets_mask):
     print 'to_gather'
     print softmax.data[0, 0, targets.data[0, 0]]
     #input = F.log_softmax(input)
-    softmax[:, :, 0] = 0  # set the 0-th element to 0 (instead of -inf)
-    loss = torch.gather(softmax, 2, targets[:, :, None]).view(-1)
+    #softmax[:, :, 0] = 0  # set the 0-th element to 0 (instead of -inf)
+    softmax = softmax.view(-1)
+    mask_2 = mask_2.view(-1)
+    loss = torch.masked_select(softmax, mask_2)
     targets_mask = targets_mask.view(-1)
-    loss = (-loss * targets_mask).sum() / targets_mask.sum()
+    loss = (-loss).sum() / targets_mask.sum()
     print 'loss = ' + str(loss.data[0])
     return loss
 
