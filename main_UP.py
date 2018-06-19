@@ -159,33 +159,19 @@ def criterion(input, targets, targets_mask):
         mask = mask.cuda()
         mask_2 = mask_2.cuda()
     mask = Variable(mask)
-    print 'input'
-    print input.data[0, 0, 0]
     input_max, _ = torch.max(input.data, dim=2)
     input_max = Variable(input_max)
     input = input - input_max[:, :, None]
     input_exp = input.exp() # num_words by ntokens
-    print 'input_exp'
-    print input_exp.data[0, 0, :]
     in_sentence_only = input_exp * mask # maxlen, bsz, ntokens
-    print 'in_sentence_only'
-    print in_sentence_only.data[0, 0, :]
     #print in_sentence_only.size()
     tempsum = torch.sum(in_sentence_only, 2, keepdim = False)
-    print 'tempsum'
-    print tempsum.data[0, 0]
     #print type(in_sentence_only)
     #print in_sentence_only.size()
     tempsum_log = tempsum.log()
     softmax = input + mask.log() # num_words by num_words
-    print 'softmax'
-    print softmax.data[0, 0, :]
     softmax = softmax - tempsum_log[:, :, None] # num_words by num_words
     #print type(softmax)
-    print 'targets'
-    print targets.data[0, 0]
-    print 'to_gather'
-    print softmax.data[0, 0, targets.data[0, 0]]
     #input = F.log_softmax(input)
     #softmax[:, :, 0] = 0  # set the 0-th element to 0 (instead of -inf)
     softmax = softmax.view(-1)
@@ -193,7 +179,6 @@ def criterion(input, targets, targets_mask):
     loss = torch.masked_select(softmax, mask_2)
     targets_mask = targets_mask.view(-1)
     loss = (-loss).sum() / targets_mask.sum()
-    print 'loss = ' + str(loss.data[0])
     return loss
 
 
@@ -249,8 +234,6 @@ def train():
         optimizer.zero_grad()
         output, _ = model(data, hidden)
         loss = criterion(output.view(-1, ntokens), targets, mask)
-        print 'Loss returned:'
-        print loss
         loss.backward()
 
         # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
