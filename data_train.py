@@ -109,7 +109,7 @@ class Corpus(object):
                     for word in words:
                         self.dictionary.add_word(word)
 
-    def add_words_test(self, file_ids):
+    def add_words_test(self, file_ids, maxlen):
         print 'add_words'
         # Add words to the dictionary
         for id in file_ids:
