@@ -59,7 +59,7 @@ def test(model, corpus, cuda, prt=False, length = 10):
     f1_list = []
 
     nsens = 0
-    for sen, sen_tree in zip(corpus.train_sens, corpus.train_trees):
+    for sen, sen_tree in zip(corpus.test_sens, corpus.test_trees):
         if len(sen) > length + 2:
             continue
         x = numpy.array([corpus.dictionary[w] for w in sen])

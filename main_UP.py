@@ -17,8 +17,6 @@ from test_phrase_grammar import test
 parser = argparse.ArgumentParser(description='PyTorch PennTreeBank RNN/LSTM Language Model')
 parser.add_argument('--data', type=str, default='./data/penn',
                     help='location of the data corpus')
-parser.add_argument('--testdata', type=str, default='./data/ptb',
-                    help='location of the parsed data')
 parser.add_argument('--emsize', type=int, default=200,
                     help='size of word embeddings')
 parser.add_argument('--nhid', type=int, default=400,
@@ -71,7 +69,6 @@ parser.add_argument('--device', type=int, default=0,
                     help='select GPU')
 parser.add_argument('--length', type=int, default=-1, help='Maximum sentence length')
 parser.add_argument('--dictname', type=str, default='dict.pkl', help='Dictionary file name')
-parser.add_argument('--testdict', type=str, default='dict.pkl', help='Dictionary file name')
 parser.add_argument('--testlen', type=int, default=10, help='Maximum number of words in test sentences')
 args = parser.parse_args()
 
@@ -89,7 +86,6 @@ if torch.cuda.is_available():
 # Load data
 ###############################################################################
 
-corpus_test = data_ptb.Corpus(args.testdata, args.length, args.testdict)
 corpus_train = data_train.Corpus(args.data, args.length, args.dictname)
 
 def batchify(data, bsz):
@@ -234,7 +230,7 @@ try:
     for epoch in range(1, args.epochs + 1):
         epoch_start_time = time.time()
         train_loss = train()
-        test_f1 = test(model, corpus_test, args.cuda, length=args.testlen)
+        test_f1 = test(model, corpus_train, args.cuda, length=args.testlen)
         print('-' * 89)
         print('| end of epoch {:3d} | time: {:5.2f}s | train loss {:5.2f} | test f1 {:5.2f}'.format(
             epoch, (time.time() - epoch_start_time), train_loss, test_f1))
@@ -255,7 +251,7 @@ with open(args.save, 'rb') as f:
     model = torch.load(f)
 
 # Run on test data.
-test_f1 = test(model, corpus_test, args.cuda, length=args.testlen)
+test_f1 = test(model, corpus_train, args.cuda, length=args.testlen)
 print('=' * 89)
 print('| End of training | test f1 {:5.2f}'.format(
     test_f1))
