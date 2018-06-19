@@ -75,6 +75,11 @@ def test(model, corpus, cuda, prt=False, length = 10, prtList=[]):
 
         depth = gates[1:-1]
         sen = sen[1:-1]
+        print '=========='
+        print ' '.join(sen)
+        for i in range(0, len(depth)):
+            print sen[i] + ' :: ' + str(depth[i])
+            
         attentions = attentions[1:-1]
         parse_tree = build_tree(depth, sen)
 
