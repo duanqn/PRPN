@@ -164,10 +164,10 @@ def criterion(input, targets, targets_mask):
     input_max, _ = torch.max(input.data, dim=2)
     input_max = Variable(input_max)
     input = input - input_max[:, :, None]
-    input = input.exp() # num_words by ntokens
-    print 'input'
-    print input.data[0, 0, :]
-    in_sentence_only = input * mask # maxlen, bsz, ntokens
+    input_exp = input.exp() # num_words by ntokens
+    print 'input_exp'
+    print input_exp.data[0, 0, :]
+    in_sentence_only = input_exp * mask # maxlen, bsz, ntokens
     print 'in_sentence_only'
     print in_sentence_only.data[0, 0, :]
     #print in_sentence_only.size()
@@ -177,7 +177,7 @@ def criterion(input, targets, targets_mask):
     #print type(in_sentence_only)
     #print in_sentence_only.size()
     tempsum_log = tempsum.log()
-    softmax = in_sentence_only.log() # num_words by num_words
+    softmax = input + mask.log() # num_words by num_words
     print 'softmax'
     print softmax.data[0, 0, :]
     softmax = softmax - tempsum_log[:, :, None] # num_words by num_words
