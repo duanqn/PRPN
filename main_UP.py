@@ -169,8 +169,7 @@ def criterion(input, targets, targets_mask):
     #print type(in_sentence_only)
     #print in_sentence_only.size()
     tempsum_log = tempsum.log()
-    softmax = input + mask.log() # num_words by num_words
-    softmax = softmax - tempsum_log[:, :, None] # num_words by num_words
+    softmax = input + mask.log() - tempsum_log[:, :, None]# num_words by 
     #print type(softmax)
     #input = F.log_softmax(input)
     #softmax[:, :, 0] = 0  # set the 0-th element to 0 (instead of -inf)
