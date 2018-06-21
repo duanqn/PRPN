@@ -95,11 +95,7 @@ class Corpus(object):
         words = []
         for w, tag in tree.pos():
             if tag in word_tags:
-                w = w.lower()
-                w = re.sub('[0-9]+', 'N', w)
-                # if tag == 'CD':
-                #     w = 'N'
-                words.append(w)
+                words.append(tag)
         return words
 
     def add_words(self, file_ids):
@@ -119,7 +115,7 @@ class Corpus(object):
         def tree2list(tree):
             if isinstance(tree, nltk.Tree):
                 if tree.label() in word_tags:
-                    return tree.leaves()[0]
+                    return tree.label()
                 else:
                     root = []
                     for child in tree:
