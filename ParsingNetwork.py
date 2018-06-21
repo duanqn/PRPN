@@ -29,17 +29,16 @@ class ParsingNetwork(nn.Module):
                                   nn.Conv1d(nhid, 2, 1, groups=2),
                                   nn.Sigmoid())
         '''
-        self.rnn = nn.Sequential(
-            nn.Dropout(dropout),
-            nn.LSTM(ninp, nhid, self.nlayers, batch_first = False, dropout = 0, bidirectional = True),
-            nn.ReLU(),
-            nn.Dropout(dropout)
-        )
+        self.rnn = nn.LSTM(ninp, nhid, self.nlayers, batch_first = False, dropout = 0, bidirectional = True)
         self.postnn = nn.Sequential(
+            nn.ReLU(),
+            nn.Dropout(dropout),
             nn.Linear(nhid * 2, 1),
             nn.Sigmoid()
         )
         self.postnn_next = nn.Sequential(
+            nn.ReLU(),
+            nn.Dropout(dropout),
             nn.Linear(nhid * 2, 1),
             nn.Sigmoid()
         )
@@ -58,6 +57,7 @@ class ParsingNetwork(nn.Module):
         if emb.is_cuda and not cell.is_cuda:
             cell = cell.cuda()
 
+        emb = self.drop(emb)
         intermediate, hc = self.rnn(emb, (hidden, cell))  # ntimestep, batchsize, vector_length
         hidden_n, cell_n = hc
 
