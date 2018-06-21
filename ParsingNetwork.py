@@ -29,9 +29,20 @@ class ParsingNetwork(nn.Module):
                                   nn.Conv1d(nhid, 2, 1, groups=2),
                                   nn.Sigmoid())
         '''
-        self.rnn = nn.LSTM(ninp, nhid, self.nlayers, batch_first = False, dropout = dropout, bidirectional = True)
-        self.postnn = nn.Linear(nhid * 2, 1)
-        self.postnn_next = nn.Linear(nhid * 2, 1)
+        self.rnn = nn.Sequential(
+            nn.Dropout(dropout),
+            nn.LSTM(ninp, nhid, self.nlayers, batch_first = False, dropout = 0, bidirectional = True),
+            nn.ReLU(),
+            nn.Dropout(dropout)
+        )
+        self.postnn = nn.Sequential(
+            nn.Linear(nhid * 2, 1),
+            nn.Sigmoid()
+        )
+        self.postnn_next = nn.Sequential(
+            nn.Linear(nhid * 2, 1),
+            nn.Sigmoid()
+        )
 
     def forward(self, emb, parser_state):
         hidden, cell, cum_gate = parser_state
