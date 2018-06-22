@@ -133,11 +133,46 @@ if args.cuda:
 
 # criterion = nn.CrossEntropyLoss()
 def criterion(input, targets, targets_mask):
+    bsz = args.batch_size
+    targets = targets.view(-1, bsz)
+    input = input.view(-1, bsz, ntokens) # num_words by ntokens
+    maxlength = input.size(0)
+    #print input.size()
+    #print targets.size()
+    mask = torch.FloatTensor(maxlength, bsz, ntokens).zero_()
+    mask_2 = torch.ByteTensor(maxlength, bsz, ntokens).zero_() # for masked_select
+    for j in range(0, bsz):
+        for i in range(0, maxlength):
+            if targets_mask.data[i, j] > 0:
+                mask_2[i, j, targets.data[i, j]] = 1
+                for k in range(i, maxlength):   # targets[i, j] is the word right after i in the sentence j
+                    if targets_mask.data[k, j] > 0:
+                        mask[i, j, targets.data[k,j]] = 1
+            else:
+                mask[i, j, 0] = 1
+    if input.is_cuda:
+        mask = mask.cuda()
+        mask_2 = mask_2.cuda()
+    mask = Variable(mask)
+    input_max, _ = torch.max(input.data, dim=2)
+    input_max = Variable(input_max)
+    input = input - input_max[:, :, None]
+    input_exp = input.exp() # num_words by ntokens
+    in_sentence_only = input_exp * mask # maxlen, bsz, ntokens
+    #print in_sentence_only.size()
+    tempsum = torch.sum(in_sentence_only, 2, keepdim = False)
+    #print type(in_sentence_only)
+    #print in_sentence_only.size()
+    tempsum_log = tempsum.log()
+    softmax = input + mask.log() - tempsum_log[:, :, None]# num_words by 
+    #print type(softmax)
+    #input = F.log_softmax(input)
+    #softmax[:, :, 0] = 0  # set the 0-th element to 0 (instead of -inf)
+    softmax = softmax.view(-1)
+    mask_2 = Variable(mask_2.view(-1))
+    loss = torch.masked_select(softmax, mask_2)
     targets_mask = targets_mask.view(-1)
-    input = input.view(-1, ntokens)
-    input = F.log_softmax(input)
-    loss = torch.gather(input, 1, targets[:, None]).view(-1)
-    loss = (-loss * targets_mask).sum() / targets_mask.sum()
+    loss = (-loss).sum() / targets_mask.sum()
     return loss
 
 
